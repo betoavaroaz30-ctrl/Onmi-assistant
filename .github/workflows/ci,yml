@@ -1,0 +1,74 @@
+
+name: OmniAssist AI CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    name: Build & Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Type Check & Lint
+        run: |
+          # Solo si tienes scripts configurados en package.json
+          # npm run lint || true 
+
+      - name: Build Web Application
+        run: npm run build
+        env:
+          # Inyectamos el API_KEY como variable de entorno para el proceso de build si es necesario
+          API_KEY: ${{ secrets.API_KEY }}
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: dist/
+          retention-days: 7
+
+  android-sync:
+    name: Capacitor Sync Check
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: dist/
+
+      - name: Sync with Android Studio
+        run: |
+          # Este paso prepara el entorno para Capacitor
+          npx cap sync android

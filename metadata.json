@@ -1,0 +1,9 @@
+{
+  "name": "OmniAssist AI Service",
+  "description": "A sophisticated AI-powered system service simulator with OCR, real-time overlay translation, and audio dubbing capabilities.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
